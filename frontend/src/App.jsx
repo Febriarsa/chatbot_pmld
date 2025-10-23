@@ -1,10 +1,10 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
 // import halaman-halaman dari src/pages
 import PocScreening from "./pages/pocScreening";
 import PocKnowledge from "./pages/pocKnowledge";
 import ExpoScoring from "./pages/expoScoring";
-import ExpoLiveAgent from "./pages/expoliveAgent";
+import ExpoLiveAgent from "./pages/expoLiveAgent";
 import ScoringReport from "./pages/scoringReport";
 
 function App() {
