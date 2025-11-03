@@ -11,13 +11,58 @@ import {
   Plus,
   Edit3,
   Settings,
+  X,
+  User,
+  MapPin,
 } from "react-feather";
+
+import { Building } from "lucide-react";
 import "../styles/pocScreening.css";
 
 const ScreeningSettings = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [skills, setSkills] = useState(["JavaScript", "React", "TypeScript"]);
   const [newSkill, setNewSkill] = useState("");
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  
+  // Sample data state
+  const [sampleData, setSampleData] = useState({
+    candidate_name: "John Doe",
+    position: "Software Engineer", 
+    company_name: "Tech Company Indonesia",
+    date: new Date().toLocaleDateString('id-ID', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+  });
+
+  // Email templates state
+  const [emailTemplates, setEmailTemplates] = useState({
+    accept: {
+      subject: "Selamat! Aplikasi Anda untuk {{position}} diterima",
+      content: `Dear {{candidate_name}},
+
+Selamat! Kami dengan senang hati memberitahukan bahwa CV Anda untuk posisi {{position}} di {{company_name}} telah lolos tahap screening awal.
+
+Tim HR kami akan segera menghubungi Anda untuk tahap selanjutnya.
+
+Terima kasih,
+HR Team {{company_name}}`
+    },
+    decline: {
+      subject: "Terima kasih atas aplikasi Anda untuk {{position}}",
+      content: `Dear {{candidate_name}},
+
+Terima kasih atas minat Anda untuk posisi {{position}} di {{company_name}}.
+
+Setelah melakukan review terhadap CV Anda, saat ini kami memutuskan untuk melanjutkan dengan kandidat lain yang lebih sesuai dengan kriteria posisi tersebut.
+
+Best regards,
+HR Team {{company_name}}`
+    }
+  });
+
   const [jobs, setJobs] = useState([
     {
       title: "Senior Frontend Developer",
@@ -32,6 +77,57 @@ const ScreeningSettings = () => {
       updated: "1 week ago",
     },
   ]);
+
+  // Function to replace placeholders with sample data
+  const replacePlaceholders = (text) => {
+    return text
+      .replace(/\{\{candidate_name\}\}/g, sampleData.candidate_name)
+      .replace(/\{\{position\}\}/g, sampleData.position)
+      .replace(/\{\{company_name\}\}/g, sampleData.company_name)
+      .replace(/\{\{date\}\}/g, sampleData.date);
+  };
+
+  // Handle sample data changes
+  const handleSampleDataChange = (field, value) => {
+    setSampleData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle email template changes
+  const handleEmailTemplateChange = (type, field, value) => {
+    setEmailTemplates(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [field]: value
+      }
+    }));
+  };
+
+  // Preview Modal Functions
+  const openPreviewModal = () => {
+    setShowPreviewModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closePreviewModal = () => {
+    setShowPreviewModal(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  // Handle ESC key to close modal
+  React.useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape' && showPreviewModal) {
+        closePreviewModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [showPreviewModal]);
 
   // Skills
   const handleAddSkill = (e) => {
@@ -108,7 +204,7 @@ const ScreeningSettings = () => {
         </div>
 
         {/* Tab Content */}
-        {/* Tab 1 */}
+        {/* Tab 1 - Template Email */}
         {activeTab === 0 && (
           <div className="tab-content active">
             <div className="placeholder-info">
@@ -121,48 +217,147 @@ const ScreeningSettings = () => {
               </div>
             </div>
 
-            <div className="email-templates">
-              <div className="template-box">
-                <h3>
-                  <CheckCircle color="#28a745" />
-                  Accept Email Template
-                </h3>
-                <div className="form-group">
-                  <label>Subject Line</label>
-                  <input type="text" defaultValue="Selamat! Aplikasi Anda untuk {{position}} diterima" />
+            <div className="email-templates-container">
+              <div className="email-templates">
+                <div className="template-box">
+                  <h3>
+                    <CheckCircle color="#28a745" />
+                    Accept Email Template
+                  </h3>
+                  <div className="form-group">
+                    <label>Subject Line</label>
+                    <input 
+                      type="text" 
+                      value={emailTemplates.accept.subject}
+                      onChange={(e) => handleEmailTemplateChange('accept', 'subject', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email Content</label>
+                    <textarea 
+                      className="textarea-large" 
+                      value={emailTemplates.accept.content}
+                      onChange={(e) => handleEmailTemplateChange('accept', 'content', e.target.value)}
+                      rows="8"
+                    />
+                  </div>
+                  <button className="btn btn-outline preview-btn">
+                    <Eye size={14} /> Preview
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>Email Content</label>
-                  <textarea className="textarea-large" defaultValue={`Dear {{candidate_name}},
 
-Selamat! Kami dengan senang hati memberitahukan bahwa CV Anda untuk posisi {{position}} di {{company_name}} telah lolos tahap screening awal.
-
-Tim HR kami akan segera menghubungi Anda untuk tahap selanjutnya.
-
-Terima kasih,
-HR Team {{company_name}}`}></textarea>
+                <div className="template-box">
+                  <h3>
+                    <XCircle color="#dc3545" />
+                    Decline Email Template
+                  </h3>
+                  <div className="form-group">
+                    <label>Subject Line</label>
+                    <input 
+                      type="text" 
+                      value={emailTemplates.decline.subject}
+                      onChange={(e) => handleEmailTemplateChange('decline', 'subject', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email Content</label>
+                    <textarea 
+                      className="textarea-large" 
+                      value={emailTemplates.decline.content}
+                      onChange={(e) => handleEmailTemplateChange('decline', 'content', e.target.value)}
+                      rows="8"
+                    />
+                  </div>
+                  <button className="btn btn-outline preview-btn">
+                    <Eye size={14} /> Preview
+                  </button>
                 </div>
               </div>
 
-              <div className="template-box">
-                <h3>
-                  <XCircle color="#dc3545" />
-                  Decline Email Template
-                </h3>
-                <div className="form-group">
-                  <label>Subject Line</label>
-                  <input type="text" defaultValue="Terima kasih atas aplikasi Anda untuk {{position}}" />
+              {/* Sample Data Section */}
+              <div className="sample-data-section">
+                <h4>📋 SAMPLE DATA</h4>
+                
+                <div className="sample-data-form">
+                  <div className="sample-field">
+                    <label>
+                      <User size={16} />
+                      Candidate :
+                    </label>
+                    <input
+                      type="text"
+                      value={sampleData.candidate_name}
+                      onChange={(e) => handleSampleDataChange('candidate_name', e.target.value)}
+                      className="sample-input"
+                    />
+                  </div>
+
+                  <div className="sample-field">
+                    <label>
+                      <Briefcase size={16} />
+                      Position :
+                    </label>
+                    <input
+                      type="text"
+                      value={sampleData.position}
+                      onChange={(e) => handleSampleDataChange('position', e.target.value)}
+                      className="sample-input"
+                    />
+                  </div>
+
+                  <div className="sample-field">
+                    <label>
+                      <Building size={16} />
+                      Company :
+                    </label>
+                    <input
+                      type="text"
+                      value={sampleData.company_name}
+                      onChange={(e) => handleSampleDataChange('company_name', e.target.value)}
+                      className="sample-input"
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Email Content</label>
-                  <textarea className="textarea-large" defaultValue={`Dear {{candidate_name}},
 
-Terima kasih atas minat Anda untuk posisi {{position}} di {{company_name}}.
+                {/* Preview Sections */}
+                <div className="email-previews">
+                  <div className="preview-section accept-preview">
+                    <h5>
+                      <CheckCircle size={16} color="#28a745" />
+                      Accept Email Template
+                    </h5>
+                    <div className="preview-field">
+                      <label>Subject Line</label>
+                      <div className="preview-content subject">
+                        {replacePlaceholders(emailTemplates.accept.subject)}
+                      </div>
+                    </div>
+                    <div className="preview-field">
+                      <label>Email Content</label>
+                      <div className="preview-content email-body">
+                        {replacePlaceholders(emailTemplates.accept.content)}
+                      </div>
+                    </div>
+                  </div>
 
-Setelah review CV Anda, kami melanjutkan dengan kandidat lain.
-
-Best regards,
-HR Team {{company_name}}`}></textarea>
+                  <div className="preview-section decline-preview">
+                    <h5>
+                      <XCircle size={16} color="#dc3545" />
+                      Decline Email Template
+                    </h5>
+                    <div className="preview-field">
+                      <label>Subject Line</label>
+                      <div className="preview-content subject">
+                        {replacePlaceholders(emailTemplates.decline.subject)}
+                      </div>
+                    </div>
+                    <div className="preview-field">
+                      <label>Email Content</label>
+                      <div className="preview-content email-body">
+                        {replacePlaceholders(emailTemplates.decline.content)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -192,7 +387,7 @@ HR Team {{company_name}}`}></textarea>
               <small>Format: PDF, DOC, DOCX (Maks. 5MB)</small>
             </div>
 
-            <button className="btn btn-outline">
+            <button className="btn btn-outline" onClick={openPreviewModal}>
               <Eye size={16} /> Preview Panduan
             </button>
           </div>
@@ -323,9 +518,6 @@ HR Team {{company_name}}`}></textarea>
 
       {/* Actions */}
       <div className="actions">
-        <button className="btn btn-secondary">
-          <Eye /> Preview Workflow
-        </button>
         <button
           className="btn btn-primary"
           onClick={(e) => {
@@ -338,6 +530,112 @@ HR Team {{company_name}}`}></textarea>
           <Save /> Save Settings
         </button>
       </div>
+
+      {/* Preview Modal */}
+      {showPreviewModal && (
+        <div className="preview-modal-overlay" onClick={closePreviewModal}>
+          <div className="preview-modal-container" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="preview-modal-header">
+              <div className="preview-modal-header-top">
+                <div className="preview-modal-title-section">
+                  <div className="preview-modal-breadcrumb">Screening CV Settings / Panduan Penilaian</div>
+                  <h2 className="preview-modal-title">
+                    <span>📋</span>
+                    <span>Panduan Penilaian CV</span>
+                  </h2>
+                  <p className="preview-modal-subtitle">
+                    Panduan lengkap untuk mengevaluasi CV kandidat berdasarkan kriteria yang telah ditentukan
+                  </p>
+                </div>
+                <button className="preview-close-btn" onClick={closePreviewModal}>
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="preview-modal-body">
+              {/* Main Content Section */}
+              <div className="preview-section">
+                <h3 className="preview-section-title">Detail Panduan</h3>
+                
+                <div className="preview-document-preview">
+                  <div className="preview-document-content">
+                    {`PANDUAN PENILAIAN CV
+
+1. KRITERIA UTAMA PENILAIAN:
+
+- Pengalaman
+  • Minimal 3-5 tahun di bidang terkait
+  • Relevansi dengan posisi yang dilamar
+  • Track record dan pencapaian yang terukur
+  
+- Pendidikan
+  • Minimal S1 dari jurusan relevan
+  • IPK minimal 3.0
+  • Sertifikasi profesional (nilai tambah)
+  
+- Keahlian Teknis
+  • Penguasaan teknologi sesuai job requirements
+  • Level keahlian (beginner/intermediate/advanced/expert)
+  • Portfolio atau project yang pernah dikerjakan
+  
+- Soft Skills
+  • Komunikasi dan kolaborasi
+  • Problem solving dan analytical thinking
+  • Kepemimpinan dan adaptabilitas
+  • Dibuktikan dari deskripsi pengalaman kerja`}
+                  </div>
+
+                  <div className="preview-criteria-section">
+                    <div className="preview-criteria-title">📊 Sistem Penilaian</div>
+                    <ul className="preview-criteria-list">
+                      <li><strong>Pengalaman Kerja:</strong> 35 poin - Evaluasi relevansi dan durasi pengalaman</li>
+                      <li><strong>Pendidikan:</strong> 25 poin - Tingkat pendidikan dan relevansi jurusan</li>
+                      <li><strong>Keahlian Teknis:</strong> 25 poin - Penguasaan tools dan teknologi</li>
+                      <li><strong>Soft Skills:</strong> 15 poin - Kemampuan interpersonal dan profesionalisme</li>
+                    </ul>
+                  </div>
+
+                  <div className="preview-highlight-box">
+                    <div className="preview-highlight-title">
+                      <span>✅</span> Kriteria Kelulusan
+                    </div>
+                    <div className="preview-highlight-content">
+                      <strong>Total Score: 100 poin</strong><br /><br />
+                      <strong>Passing Score: ≥ 70 poin</strong><br />
+                      CV dengan skor 70 ke atas akan otomatis diteruskan ke tahap wawancara.<br /><br />
+                      <strong>Rejected: &lt; 70 poin</strong><br />
+                      CV dengan skor di bawah 70 akan mendapat email penolakan otomatis.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* File Upload Section */}
+              <div className="preview-section">
+                <h3 className="preview-section-title">📎 File Panduan Tambahan</h3>
+                
+                <div className="preview-no-file-state">
+                  <div className="preview-no-file-icon">📄</div>
+                  <div className="preview-no-file-text">
+                    <strong>Tidak ada file yang diunggah</strong><br />
+                    Anda dapat mengunggah file panduan tambahan (PDF, DOC, DOCX) untuk referensi AI yang lebih detail.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="preview-modal-footer">
+              <button className="preview-footer-btn secondary" onClick={closePreviewModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

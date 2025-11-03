@@ -296,9 +296,6 @@ const KnowledgeManager = () => {
                 <button className="btn btn-sm btn-outline" onClick={() => openModal(role)}>
                   <Edit3 size={14} /> Edit
                 </button>
-                <button className="btn btn-sm btn-secondary">
-                  <Eye size={14} /> Preview
-                </button>
                 <button className="btn btn-sm btn-danger" onClick={() => deleteRole(role.id)}>
                   <Trash2 size={14} /> Delete
                 </button>
@@ -333,9 +330,7 @@ const KnowledgeManager = () => {
                   <button className="btn btn-sm btn-outline" onClick={() => openModal(r)}>
                     <Edit3 size={14} />
                   </button>
-                  <button className="btn btn-sm btn-secondary">
-                    <Eye size={14} />
-                  </button>
+                  
                   <button className="btn btn-sm btn-danger" onClick={() => deleteRole(r.id)}>
                     <Trash2 size={14} />
                   </button>
