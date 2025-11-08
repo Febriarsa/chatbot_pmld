@@ -6,6 +6,8 @@ import PocKnowledge from "./pages/pocKnowledge";
 import ExpoScoring from "./pages/expoScoring";
 import ExpoLiveAgent from "./pages/expoLiveAgent";
 import ScoringReport from "./pages/scoringReport";
+import FormCV from "./pages/FormCV";
+import CVResults from "./pages/CVResults";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/expo-scoring" element={<ExpoScoring />} />
         <Route path="/expo-live-agent" element={<ExpoLiveAgent />} />
         <Route path="/scoring-report" element={<ScoringReport />} />
+        <Route path="/form-cv/:formId" element={<FormCV />} />
+        <Route path="/cv-results/:formId" element={<CVResults />} />
       </Routes>
     </BrowserRouter>
   );
